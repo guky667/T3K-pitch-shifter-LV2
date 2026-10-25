@@ -1,0 +1,1 @@
+(Note: Change pitch_shift.so to pitch_shift.dll when testing on Windows 11).
