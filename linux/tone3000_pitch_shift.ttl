@@ -1,0 +1,94 @@
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix bufsz: <http://lv2plug.in/ns/ext/buf-size#> .
+@prefix mod:   <http://moddevices.com/ns/mod#> .
+
+<https://github.com/tone-3000/tone3000-plugin#pitch-shift>
+    a lv2:Plugin ,
+      lv2:PitchPlugin ;
+    doap:name "TONE3000 Pitch Shifter" ;
+    doap:license <http://opensource.org/licenses/MIT> ;
+    doap:maintainer [
+        foaf:name "TONE3000" ;
+        foaf:homepage <https://github.com/tone-3000/tone3000-plugin>
+    ] ;
+    mod:brand "TONE3000" ;
+    mod:label "Pitch Shifter" ;
+    lv2:optionalFeature lv2:hardRTCapable ;
+    bufsz:maxBlockLength 128 ;
+    rdfs:comment "Polyphonic correlation-spliced pitch shifter from the open-source TONE3000 plugin." ;
+
+    lv2:port [
+        a lv2:AudioPort ,
+          lv2:InputPort ;
+        lv2:index 0 ;
+        lv2:symbol "in_l" ;
+        lv2:name "Input L"
+    ] , [
+        a lv2:AudioPort ,
+          lv2:InputPort ;
+        lv2:index 1 ;
+        lv2:symbol "in_r" ;
+        lv2:name "Input R"
+    ] , [
+        a lv2:AudioPort ,
+          lv2:OutputPort ;
+        lv2:index 2 ;
+        lv2:symbol "out_l" ;
+        lv2:name "Output L"
+    ] , [
+        a lv2:AudioPort ,
+          lv2:OutputPort ;
+        lv2:index 3 ;
+        lv2:symbol "out_r" ;
+        lv2:name "Output R"
+    ] , [
+        a lv2:ControlPort ,
+          lv2:InputPort ;
+        lv2:index 4 ;
+        lv2:symbol "pitch" ;
+        lv2:name "Pitch" ;
+        lv2:default 0 ;
+        lv2:minimum -24 ;
+        lv2:maximum 24 ;
+        lv2:portProperty lv2:integer ;
+        units:unit units:semitone12TET
+    ] , [
+        a lv2:ControlPort ,
+          lv2:InputPort ;
+        lv2:index 5 ;
+        lv2:symbol "tonality_hz" ;
+        lv2:name "Tonality Freq" ;
+        lv2:default 20000 ;
+        lv2:minimum 1000 ;
+        lv2:maximum 20000 ;
+        lv2:portProperty lv2:integer ;
+        mod:rangeSteps 191 ;
+        units:unit units:hz ;
+        lv2:scalePoint [
+            rdfs:label "Off (20 kHz)" ;
+            rdf:value 20000
+        ]
+    ] , [
+        a lv2:ControlPort ,
+          lv2:InputPort ;
+        lv2:index 6 ;
+        lv2:symbol "buffer_ms" ;
+        lv2:name "Buffer Size" ;
+        lv2:default 30 ;
+        lv2:minimum 20 ;
+        lv2:maximum 60 ;
+        lv2:portProperty lv2:integer ,
+                         lv2:enumeration ;
+        mod:rangeSteps 5 ;
+        units:unit units:ms ;
+        lv2:scalePoint [ rdfs:label "20 ms" ; rdf:value 20 ] ,
+                       [ rdfs:label "30 ms" ; rdf:value 30 ] ,
+                       [ rdfs:label "40 ms" ; rdf:value 40 ] ,
+                       [ rdfs:label "50 ms" ; rdf:value 50 ] ,
+                       [ rdfs:label "60 ms" ; rdf:value 60 ]
+    ] .
