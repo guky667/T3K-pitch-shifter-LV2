@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOD Dwarf Pitch-Shifter — TONE3000 x guky667</title>
+    <!-- Tailwind CSS (Local / CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* System font stack optimized for embedded MOD-UI WebView (zero font downloads) */
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: transparent;
+            min-height: 100vh;
+            color: #e2e8f0;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .font-mono-custom {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        /* Landscape Pedal Main Chassis */
+        .pedal-chassis {
+            background: linear-gradient(135deg, #1a0c33 0%, #2b174a 40%, #15082a 75%, #0e041d 100%);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(157, 78, 221, 0.4);
+        }
+
+        /* Inner Anodized Faceplate */
+        .faceplate {
+            background: radial-gradient(ellipse at 50% 40%, #291547 0%, #1c0c33 70%, #120524 100%);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 2px solid #522185;
+        }
+
+        /* Screw Hardware */
+        .screw {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #cbd5e1 0%, #64748b 60%, #1e293b 100%);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .screw::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 7px;
+            height: 2px;
+            background: #0f172a;
+            transform: translate(-50%, -50%) rotate(40deg);
+        }
+
+        /* TS 1/4" Side Jacks */
+        .jack-housing {
+            background: linear-gradient(180deg, #94a3b8 0%, #475569 50%, #1e293b 100%);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
+        }
+        .jack-hex-nut {
+            background: repeating-conic-gradient(#cbd5e1 0% 30deg, #64748b 30deg 60deg);
+            border: 1px solid #334155;
+        }
+
+        /* Stomp Footswitch & LED */
+        .footswitch-housing {
+            background: radial-gradient(circle at 40% 40%, #cbd5e1 0%, #64748b 60%, #1e293b 100%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.7);
+        }
+        .footswitch-button {
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 40%, #64748b 80%, #1e293b 100%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.8);
+            transition: transform 0.08s ease;
+        }
+        .footswitch-button:active, .footswitch-button.pressed {
+            transform: scale(0.93) translateY(2px);
+        }
+
+        /* Bypass Jewel LED */
+        .jewel-led {
+            transition: background 0.15s ease, box-shadow 0.15s ease;
+        }
+        .jewel-led.active {
+            background: radial-gradient(circle at 35% 35%, #a7f3d0 0%, #39ff14 50%, #059669 80%, #022c22 100%);
+            box-shadow: 0 0 10px #39ff14, inset 0 0 4px rgba(255,255,255,0.8);
+        }
+        .jewel-led.bypassed {
+            background: radial-gradient(circle at 35% 35%, #f472b6 0%, #7b2cbf 60%, #140326 100%);
+            opacity: 0.55;
+        }
+
+        /* Lightweight Rotary Controls */
+        .knob-container {
+            touch-action: none;
+            cursor: ns-resize;
+        }
+        .knob-cap {
+            background: radial-gradient(circle at 30% 30%, #334155 0%, #1e293b 65%, #0f172a 95%);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.3);
+            border: 2px solid #475569;
+            will-change: transform;
+        }
+        .knob-pointer-green {
+            background: #39ff14;
+            box-shadow: 0 0 4px #39ff14;
+        }
+        .knob-pointer-violet {
+            background: #c084fc;
+            box-shadow: 0 0 4px #c084fc;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch-base {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+            border: 1px solid #475569;
+        }
+        .toggle-lever {
+            background: linear-gradient(180deg, #f8fafc 0%, #94a3b8 40%, #475569 80%, #334155 100%);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.9);
+            transition: transform 0.12s ease-out;
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4">
+
+    <!-- MAIN PEDAL CONTAINER (LANDSCAPE ORIENTATION) -->
+    <div class="relative w-full max-w-4xl mod-pedal-wrapper" mod-role="pedal">
+
+        <!-- LEFT: TS 1/4" Metal Input Jack -->
+        <div class="hidden sm:flex absolute -left-5 top-1/2 -translate-y-1/2 flex-col items-center z-10 pointer-events-none">
+            <div class="w-5 h-9 jack-housing rounded-l-md flex items-center justify-start pl-0.5">
+                <div class="w-2 h-6 jack-hex-nut rounded-sm"></div>
+                <div class="w-3 h-3 bg-zinc-950 rounded-full border border-slate-600"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: TS 1/4" Metal Output Jack -->
+        <div class="hidden sm:flex absolute -right-5 top-1/2 -translate-y-1/2 flex-col items-center z-10 pointer-events-none">
+            <div class="w-5 h-9 jack-housing rounded-r-md flex items-center justify-end pr-0.5">
+                <div class="w-3 h-3 bg-zinc-950 rounded-full border border-slate-600"></div>
+                <div class="w-2 h-6 jack-hex-nut rounded-sm"></div>
+            </div>
+        </div>
+
+        <!-- PEDAL CHASSIS -->
+        <div class="pedal-chassis rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+
+            <!-- Geometric Cuts (Pure SVG) -->
+            <svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#39ff14" stop-opacity="0.8"/>
+                        <stop offset="50%" stop-color="#7b2cbf" stop-opacity="0.5"/>
+                        <stop offset="100%" stop-color="#00f5d4" stop-opacity="0.8"/>
+                    </linearGradient>
+                </defs>
+                <polygon points="0,30 140,0 170,0 0,45" fill="url(#lineGrad)" />
+                <polygon points="900,140 680,240 720,240 900,160" fill="url(#lineGrad)" />
+                <line x1="0" y1="75" x2="900" y2="75" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="6 6" />
+                <line x1="0" y1="175" x2="900" y2="175" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="10 6" />
+            </svg>
+
+            <!-- Four Corner Screws -->
+            <div class="screw absolute top-3 left-3"></div>
+            <div class="screw absolute top-3 right-3"></div>
+            <div class="screw absolute bottom-3 left-3"></div>
+            <div class="screw absolute bottom-3 right-3"></div>
+
+            <!-- INNER FACEPLATE -->
+            <div class="faceplate rounded-xl p-4 relative z-0 flex flex-col justify-between space-y-4">
+
+                <!-- TOP BRANDING & CREDITS -->
+                <div class="flex items-center justify-between border-b border-purple-800/40 pb-2.5">
+                    
+                    <!-- Main DSP Credit: TONE3000 -->
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-5 bg-emerald-400 rounded-sm shadow-[0_0_6px_#39ff14]"></div>
+                        <div>
+                            <div class="text-sm sm:text-base font-black tracking-widest text-emerald-400 font-mono-custom leading-none">
+                                DSP: TONE3000
+                            </div>
+                            <div class="text-[9px] font-semibold text-purple-300 tracking-wider font-mono-custom mt-0.5">
+                                LV2 PITCH-SHIFTER
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Builder Stamp -->
+                    <div class="bg-slate-950/90 border border-purple-500/40 px-2.5 py-1 rounded shadow-inner">
+                        <div class="text-[10px] font-mono-custom text-purple-200">
+                            Duct-taped & packaged by <span class="font-bold text-emerald-400">guky667</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MIDDLE SECTION: 5 LV2 CONTROLS (HORIZONTAL LANDSCAPE) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-5 items-center justify-items-center py-1">
+                    
+                    <!-- CONTROL 1: Pitch (-24.0 to +24.0 st) -->
+                    <div class="flex flex-col items-center" mod-role="control-group" mod-port-symbol="semitones">
+                        <span class="text-xs font-bold text-emerald-400 tracking-wider mb-1 font-mono-custom">PITCH</span>
+                        <div id="knob-pitch" class="knob-container relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center" mod-role="input-control">
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none -rotate-90 text-purple-400/30" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="3 7" />
+                            </svg>
+                            <div id="cap-pitch" class="knob-cap w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center relative">
+                                <div class="knob-pointer-green w-1.5 h-5 sm:h-6 rounded-full absolute top-1 origin-bottom"></div>
+                                <div class="w-4 h-4 rounded-full bg-slate-900 border border-emerald-500/40"></div>
+                            </div>
+                        </div>
+                        <div class="mt-1.5 text-center">
+                            <div id="val-pitch" class="text-xs font-mono-custom font-bold text-emerald-300 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900">0.0 st</div>
+                            <span class="text-[8.5px] text-purple-300/60 font-mono-custom uppercase">[-24 to +24]</span>
+                        </div>
+                    </div>
+
+                    <!-- CONTROL 2: Step Switch (Toggle 0 or 1) -->
+                    <div class="flex flex-col items-center justify-center" mod-role="control-group" mod-port-symbol="step">
+                        <span class="text-xs font-bold text-purple-300 tracking-wider mb-1 font-mono-custom">STEP</span>
+                        <div id="switch-step" class="toggle-switch-base w-10 h-16 rounded-full p-1 relative cursor-pointer flex flex-col justify-between items-center shadow-inner" mod-role="input-control">
+                            <!-- Top LED (ON) -->
+                            <div id="led-step-on" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#39ff14]"></div>
+                            <!-- Lever -->
+                            <div id="lever-step" class="toggle-lever w-6.5 h-6.5 rounded-full border border-slate-400 relative z-10 flex items-center justify-center">
+                                <div class="w-2.5 h-0.5 bg-slate-700 rounded-full"></div>
+                            </div>
+                            <!-- Bottom LED (OFF) -->
+                            <div id="led-step-off" class="w-2 h-2 rounded-full bg-purple-950 border border-purple-800"></div>
+                        </div>
+                        <div class="mt-1.5 text-center">
+                            <div id="val-step" class="text-xs font-mono-custom font-bold text-emerald-400 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900">On</div>
+                            <span class="text-[8.5px] text-purple-300/60 font-mono-custom uppercase">[Step Mode]</span>
+                        </div>
+                    </div>
+
+                    <!-- CONTROL 3: Window Rotary Selector (Enumeration 0..3) -->
+                    <div class="flex flex-col items-center" mod-role="control-group" mod-port-symbol="window">
+                        <span class="text-xs font-bold text-purple-300 tracking-wider mb-1 font-mono-custom">WINDOW</span>
+                        <div id="knob-window" class="knob-container relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center" mod-role="input-control">
+                            <!-- 4 Tick Marks (-135, -45, 45, 135 deg) -->
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none text-purple-400/40" viewBox="0 0 100 100">
+                                <line x1="20" y1="80" x2="28" y2="72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                <line x1="20" y1="20" x2="28" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                <line x1="80" y1="20" x2="72" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                <line x1="80" y1="80" x2="72" y2="72" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                            </svg>
+                            <!-- Knob Cap -->
+                            <div id="cap-window" class="knob-cap w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center">
+                                <div class="knob-pointer-violet w-1.5 h-5 sm:h-6 rounded-full absolute top-1 origin-bottom"></div>
+                            </div>
+                        </div>
+                        <div class="mt-1.5 text-center">
+                            <div id="val-window" class="text-xs font-mono-custom font-bold text-purple-300 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900">30 ms</div>
+                            <span class="text-[8.5px] text-purple-300/60 font-mono-custom uppercase">[20-60 ms]</span>
+                        </div>
+                    </div>
+
+                    <!-- CONTROL 4: Tonality Knob (1000 to 20000 Hz Logarithmic) -->
+                    <div class="flex flex-col items-center" mod-role="control-group" mod-port-symbol="tonality">
+                        <span class="text-xs font-bold text-purple-300 tracking-wider mb-1 font-mono-custom">TONALITY</span>
+                        <div id="knob-tonality" class="knob-container relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center" mod-role="input-control">
+                            <div id="cap-tonality" class="knob-cap w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center">
+                                <div class="knob-pointer-violet w-1.5 h-5 sm:h-6 rounded-full absolute top-1 origin-bottom"></div>
+                            </div>
+                        </div>
+                        <div class="mt-1.5 text-center">
+                            <div id="val-tonality" class="text-xs font-mono-custom font-bold text-purple-300 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900">20.0 kHz</div>
+                            <span class="text-[8.5px] text-purple-300/60 font-mono-custom uppercase">[1 - 20 kHz]</span>
+                        </div>
+                    </div>
+
+                    <!-- CONTROL 5: Mix Knob (0% to 100%) -->
+                    <div class="flex flex-col items-center" mod-role="control-group" mod-port-symbol="mix">
+                        <span class="text-xs font-bold text-emerald-400 tracking-wider mb-1 font-mono-custom">MIX</span>
+                        <div id="knob-mix" class="knob-container relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center" mod-role="input-control">
+                            <div id="cap-mix" class="knob-cap w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center">
+                                <div class="knob-pointer-green w-1.5 h-5 sm:h-6 rounded-full absolute top-1 origin-bottom"></div>
+                            </div>
+                        </div>
+                        <div class="mt-1.5 text-center">
+                            <div id="val-mix" class="text-xs font-mono-custom font-bold text-emerald-300 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900">100 %</div>
+                            <span class="text-[8.5px] text-purple-300/60 font-mono-custom uppercase">[0 - 100%]</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BOTTOM SECTION: STOMP FOOTSWITCH & BYPASS LED -->
+                <div class="flex flex-col items-center justify-center pt-1 border-t border-purple-900/40 relative">
+
+                    <!-- Bypass LED Indicator -->
+                    <div class="flex items-center space-x-2 mb-1.5">
+                        <span class="text-[9px] font-bold text-purple-300 tracking-widest font-mono-custom">BYPASS</span>
+                        <div id="bypass-jewel" class="jewel-led active w-4 h-4 rounded-full border-2 border-slate-700"></div>
+                        <span class="text-[9px] font-bold text-emerald-400 tracking-widest font-mono-custom">ENGAGED</span>
+                    </div>
+
+                    <!-- Stomp Footswitch -->
+                    <div class="footswitch-housing w-16 h-16 sm:w-18 sm:h-18 rounded-full p-1.5 flex items-center justify-center cursor-pointer relative" id="footswitch-btn">
+                        <div class="w-13 h-13 sm:w-15 sm:h-15 rounded-full border-2 border-slate-500/60 flex items-center justify-center">
+                            <div id="footswitch-plunger" class="footswitch-button w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center">
+                                <div class="w-5 h-5 rounded-full border border-slate-400/40 bg-slate-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTWEIGHT, OPTIMIZED CONTROLLER LOGIC -->
+    <script>
+        // Exact LV2 defaults matching controlls.txt
+        const state = {
+            semitones: 0.0,   // Port index 2: -24.0 to +24.0
+            step: 1,          // Port index 3: 0 or 1
+            window: 1,        // Port index 4: 0, 1, 2, 3 (20ms, 30ms, 40ms, 60ms)
+            tonality: 20000.0,// Port index 5: 1000.0 to 20000.0 Hz (log)
+            mix: 100.0,       // Port index 6: 0.0 to 100.0 %
+            bypass: false
+        };
+
+        const windowLabels = ["20 ms", "30 ms", "40 ms", "60 ms"];
+
+        function valToAngle(val, min, max) {
+            return -135 + ((val - min) / (max - min)) * 270;
+        }
+
+        // Optimized batch UI update (Direct DOM modifications without unnecessary repaints)
+        function updateUI() {
+            // 1. Pitch
+            let pitchVal = state.semitones;
+            if (state.step === 1) pitchVal = Math.round(pitchVal);
+            document.getElementById('cap-pitch').style.transform = `rotate(${valToAngle(pitchVal, -24, 24)}deg)`;
+            document.getElementById('val-pitch').innerText = `${pitchVal > 0 ? '+' : ''}${pitchVal.toFixed(state.step === 1 ? 0 : 1)} st`;
+
+            // 2. Step Toggle Switch (No 1/0 numbers, clean On/Off indicators)
+            const lever = document.getElementById('lever-step');
+            const ledOn = document.getElementById('led-step-on');
+            const ledOff = document.getElementById('led-step-off');
+            const valStep = document.getElementById('val-step');
+
+            if (state.step === 1) {
+                lever.style.transform = 'translateY(-11px)';
+                ledOn.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#39ff14]';
+                ledOff.className = 'w-2 h-2 rounded-full bg-purple-950 border border-purple-800';
+                valStep.innerText = 'On';
+                valStep.className = 'text-xs font-mono-custom font-bold text-emerald-400 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900';
+            } else {
+                lever.style.transform = 'translateY(11px)';
+                ledOn.className = 'w-2 h-2 rounded-full bg-emerald-950 border border-emerald-800';
+                ledOff.className = 'w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_6px_#c084fc]';
+                valStep.innerText = 'Off';
+                valStep.className = 'text-xs font-mono-custom font-bold text-purple-300 bg-slate-950/90 px-2 py-0.5 rounded border border-purple-900';
+            }
+
+            // 3. Window Rotary Selector (True Drag-to-rotate snapped to 4 positions: -135, -45, 45, 135 deg)
+            const windowAngles = [-135, -45, 45, 135];
+            document.getElementById('cap-window').style.transform = `rotate(${windowAngles[state.window]}deg)`;
+            document.getElementById('val-window').innerText = windowLabels[state.window];
+
+            // 4. Tonality (Logarithmic)
+            const logMin = Math.log10(1000);
+            const logMax = Math.log10(20000);
+            const tonalityNorm = (Math.log10(state.tonality) - logMin) / (logMax - logMin);
+            document.getElementById('cap-tonality').style.transform = `rotate(${-135 + tonalityNorm * 270}deg)`;
+            document.getElementById('val-tonality').innerText = state.tonality >= 10000 
+                ? (state.tonality / 1000).toFixed(1) + ' kHz'
+                : (state.tonality / 1000).toFixed(2) + ' kHz';
+
+            // 5. Mix
+            document.getElementById('cap-mix').style.transform = `rotate(${valToAngle(state.mix, 0, 100)}deg)`;
+            document.getElementById('val-mix').innerText = `${Math.round(state.mix)} %`;
+
+            // 6. Bypass LED
+            const jewel = document.getElementById('bypass-jewel');
+            jewel.className = state.bypass
+                ? 'jewel-led bypassed w-4 h-4 rounded-full border-2 border-slate-700'
+                : 'jewel-led active w-4 h-4 rounded-full border-2 border-slate-700';
+        }
+
+        // Generic Pointer Drag Handler (Supports Pitch, Window, Tonality, Mix)
+        function attachKnobEvents(elementId, paramKey, min, max, isLog = false, isEnum = false) {
+            const el = document.getElementById(elementId);
+            let startY = 0;
+            let startVal = 0;
+            let isDragging = false;
+
+            function onPointerDown(e) {
+                isDragging = true;
+                startY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+                startVal = state[paramKey];
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
+            }
+
+            function onPointerMove(e) {
+                if (!isDragging) return;
+                const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+                const deltaY = startY - currentY;
+
+                if (isEnum) {
+                    // Snap window steps based on vertical displacement
+                    const stepDiff = Math.round(deltaY / 30);
+                    let newStep = startVal + stepDiff;
+                    newStep = Math.max(min, Math.min(max, newStep));
+                    if (state[paramKey] !== newStep) {
+                        state[paramKey] = newStep;
+                        updateUI();
+                    }
+                } else if (isLog) {
+                    const logMin = Math.log10(min);
+                    const logMax = Math.log10(max);
+                    let logVal = Math.log10(startVal) + (deltaY * (logMax - logMin) / 160);
+                    logVal = Math.max(logMin, Math.min(logMax, logVal));
+                    state[paramKey] = Math.pow(10, logVal);
+                    updateUI();
+                } else {
+                    const sensitivity = (max - min) / 160;
+                    let newVal = startVal + deltaY * sensitivity;
+                    newVal = Math.max(min, Math.min(max, newVal));
+                    if (paramKey === 'semitones' && state.step === 1) newVal = Math.round(newVal);
+                    state[paramKey] = newVal;
+                    updateUI();
+                }
+            }
+
+            function onPointerUp() {
+                isDragging = false;
+                document.removeEventListener('pointermove', onPointerMove);
+                document.removeEventListener('pointerup', onPointerUp);
+            }
+
+            el.addEventListener('pointerdown', onPointerDown);
+
+            el.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const dir = e.deltaY < 0 ? 1 : -1;
+                if (isEnum) {
+                    let nextVal = state[paramKey] + dir;
+                    state[paramKey] = Math.max(min, Math.min(max, nextVal));
+                } else if (isLog) {
+                    const logMin = Math.log10(min);
+                    const logMax = Math.log10(max);
+                    let logVal = Math.log10(state[paramKey]) + (dir * 0.03);
+                    logVal = Math.max(logMin, Math.min(logMax, logVal));
+                    state[paramKey] = Math.pow(10, logVal);
+                } else {
+                    const stepVal = (paramKey === 'semitones' && state.step === 1) ? 1 : (max - min) / 30;
+                    let newVal = state[paramKey] + dir * stepVal;
+                    newVal = Math.max(min, Math.min(max, newVal));
+                    if (paramKey === 'semitones' && state.step === 1) newVal = Math.round(newVal);
+                    state[paramKey] = newVal;
+                }
+                updateUI();
+            });
+        }
+
+        // Attach Rotary Controllers
+        attachKnobEvents('knob-pitch', 'semitones', -24.0, 24.0);
+        attachKnobEvents('knob-window', 'window', 0, 3, false, true);
+        attachKnobEvents('knob-tonality', 'tonality', 1000.0, 20000.0, true);
+        attachKnobEvents('knob-mix', 'mix', 0.0, 100.0);
+
+        // Toggle Switch Click
+        document.getElementById('switch-step').addEventListener('click', () => {
+            state.step = state.step === 1 ? 0 : 1;
+            if (state.step === 1) state.semitones = Math.round(state.semitones);
+            updateUI();
+        });
+
+        // Bypass Footswitch
+        const footswitch = document.getElementById('footswitch-btn');
+        const plunger = document.getElementById('footswitch-plunger');
+        footswitch.addEventListener('click', () => {
+            state.bypass = !state.bypass;
+            plunger.classList.add('pressed');
+            setTimeout(() => plunger.classList.remove('pressed'), 100);
+            updateUI();
+        });
+
+        // Initial Paint
+        window.onload = updateUI;
+    </script>
+</body>
+</html>
